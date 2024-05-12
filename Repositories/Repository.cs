@@ -16,6 +16,11 @@ namespace U3Api.Repositories
             return Context.Set<T>();
         }
 
+        public virtual T? Get(object id)
+        {
+            return Context.Find<T>(id);
+        }
+
         public virtual void Insert(T entity)
         {
             Context.Add(entity);
@@ -35,5 +40,13 @@ namespace U3Api.Repositories
             Context.SaveChanges();
         }
 
+        public virtual void Delete(object id)
+        {
+            var entity = Get(id);
+            if (entity != null)
+            {
+                Delete(entity);
+            }
+        }
     }
 }

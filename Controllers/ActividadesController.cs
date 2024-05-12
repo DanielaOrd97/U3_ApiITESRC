@@ -61,5 +61,22 @@ namespace Proyecto_U3.Controllers
 
             return BadRequest(resultados.Errors.Select(x => x.ErrorMessage));
         }
-}
+
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            var actividad = Repo.Get(id);
+
+            if(actividad == null || actividad.Estado == 3)
+            {
+                return NotFound();
+            }
+
+            actividad.Estado = 3;
+            actividad.FechaActualizacion = DateTime.UtcNow;
+            Repo.Update(actividad);
+            return Ok();
+        }
+    }
 }
