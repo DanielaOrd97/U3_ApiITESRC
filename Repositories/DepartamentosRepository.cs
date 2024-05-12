@@ -1,6 +1,6 @@
 ﻿using U3Api.Models.Entities;
 
-namespace Proyecto_U3.Repositories
+namespace U3Api.Repositories
 {
     public class DepartamentosRepository
     {
