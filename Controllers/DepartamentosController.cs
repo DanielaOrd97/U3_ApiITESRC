@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Proyecto_U3.Repositories;
 using U3Api.Models.DTOs;
 using U3Api.Models.Entities;
+using U3Api.Repositories;
 
 namespace Proyecto_U3.Controllers
 {

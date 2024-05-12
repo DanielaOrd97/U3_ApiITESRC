@@ -2,8 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Proyecto_U3.Converters;
-using Proyecto_U3.Repositories;
 using U3Api.Models.Entities;
+using U3Api.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
