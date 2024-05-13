@@ -21,6 +21,8 @@ namespace Proyecto_U3.Controllers
         [HttpGet]
         public IActionResult GetAllActividades()
         {
+            //Parametros de fecha.
+
             var actividades = Repo.GetAll().
                 OrderBy(x => x.FechaCreacion).
                 Select(x => new ActividadDTO
@@ -58,6 +60,40 @@ namespace Proyecto_U3.Controllers
                 Repo.Insert(entidad);
                 return Ok();
         }
+
+            return BadRequest(resultados.Errors.Select(x => x.ErrorMessage));
+        }
+
+
+        [HttpPut("{id}")]
+        public IActionResult PutAct(ActividadDTO dto)
+        {
+            ActividadValidator validator = new();
+            var resultados = validator.Validate(dto);
+
+            if (resultados.IsValid)
+            {
+                var actividad = Repo.Get(dto.Id ?? 0);
+
+                if (actividad == null || actividad.Estado == 3)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    actividad.Titulo = dto.Titulo;
+                    actividad.Descripcion = dto.Descripcion;
+                    actividad.FechaRealizacion = dto.FechaDeRealizacion;
+                    actividad.IdDepartamento = dto.IdDepartamento;
+                    actividad.FechaCreacion = dto.FechaDeCreacion;
+                    actividad.FechaActualizacion = DateTime.UtcNow;
+                    actividad.Estado = dto.Estado;  
+
+                    Repo.Update(actividad);
+
+                    return Ok();
+                }
+            }
 
             return BadRequest(resultados.Errors.Select(x => x.ErrorMessage));
         }
