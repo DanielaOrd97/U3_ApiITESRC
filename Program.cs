@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Proyecto_U3.Converters;
@@ -9,8 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-
-builder.Services.AddDbContext<ItesrcneActividadesContext>(x => x.UseMySql("server=204.93.216.11;database=itesrcne_actividades;user=itesrcne_deptos;password=sistemaregistrotec24", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.3.29-mariadb")));
+var connectionstring = builder.Configuration.GetConnectionString("ApiU3ConnectionString");
+builder.Services.AddDbContext<ItesrcneActividadesContext>(x => x.UseMySql(connectionstring, ServerVersion.AutoDetect(connectionstring)));
 
 builder.Services.AddTransient<Repository<Departamentos>>();
 builder.Services.AddTransient<Repository<Actividades>>();
@@ -21,7 +23,20 @@ builder.Services.AddControllers().AddJsonOptions(opt =>
     opt.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
 });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(x =>
+{
+    x.Audience = "pruebaU3";
+    x.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes("oWgVSB6azKciOUdwnRSMxKPyccYXiVp0qP0svFWemCQRK45kkbf3rqHbykHHYntKYyMxjKFJia9n7ZbKiC380uFSBuSuhzRd8IhY"));
+    x.TokenValidationParameters.ValidIssuer = "itesrcU3";
+
+});
+
+
 builder.Services.AddEndpointsApiExplorer();
+
+
 builder.Services.AddSwaggerGen(opt =>
     opt.MapType<DateOnly>(() => new OpenApiSchema
     {
@@ -43,6 +58,7 @@ if (app.Environment.IsDevelopment())
 app.UseDeveloperExceptionPage();
 
 app.UseHttpsRedirection();
+
 
 app.UseAuthorization();
 
