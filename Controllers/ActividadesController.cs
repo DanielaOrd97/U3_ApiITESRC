@@ -19,9 +19,28 @@ namespace Proyecto_U3.Controllers
             Repo = repo;
         }
 
-        [HttpGet]
+        /// <summary>
+        /// AUTORIZACION DE USUARIOS MANUAL.
+        /// </summary>
+
+        /*
+        [HttpGet("Direccion_General/{estado}")]
         [Authorize(Roles = "Director General")]
-        public IActionResult GetAllActividades(int estado)
+        public IActionResult GetAllActividades(string estado)
+        {
+            var deptIdClaim = User.Claims.FirstOrDefault(x => x.Type == "id");
+
+            if (deptIdClaim == null || !int.TryParse(deptIdClaim.Value, out int deptid))
+            {
+                return Unauthorized();
+            }
+
+            return Ok(GetActividades(deptid, estado));
+        }
+
+        [HttpGet("Direccion_academica")]
+        [Authorize(Roles = "Direccion Academica")]
+        public IActionResult GetActividadesDireccionAcademica(string estado)
         {
             var deptIdClaim = User.Claims.FirstOrDefault(x => x.Type == "id");
 
@@ -33,9 +52,9 @@ namespace Proyecto_U3.Controllers
             return Ok(GetActividades(deptid,estado));
         }
 
-        [HttpGet("Direccion_academica")]
-        [Authorize(Roles = "Direccion Academica")]
-        public IActionResult GetActividadesDireccionAcademica(int estado)
+        [HttpGet("Direccion_PlaneacionYVinculacion")]
+        [Authorize(Roles = "DIRECCIÓN DE PLANEACIÓN Y VINCULACIÓN")]
+        public IActionResult GetActividadesPlaneacionYVinculacion(string estado)
         {
             var deptIdClaim = User.Claims.FirstOrDefault(x => x.Type == "id");
 
@@ -44,13 +63,13 @@ namespace Proyecto_U3.Controllers
                 return Unauthorized();
             }
 
-            return Ok(GetActividades(deptid,estado));
+            return Ok(GetActividades(deptid, estado));
         }
 
 
         [HttpGet("Subireccion_academica")]
         [Authorize(Roles = "Subireccion Academica")]
-        public IActionResult GetActividadesSubDireccionAcademica(int estado)
+        public IActionResult GetActividadesSubDireccionAcademica(string estado)
         {
             var deptIdClaim = User.Claims.FirstOrDefault(x => x.Type == "id");
 
@@ -63,12 +82,10 @@ namespace Proyecto_U3.Controllers
 
         }
 
-
-        [HttpGet("sistemas_computacionales")]
-        [Authorize(Roles = "DIVISIÓN DE INGENIERÍA EN SISTEMAS COMPUTACIONALES")]
-        public IActionResult GetActividadesSistemas()
+        [HttpGet("Subireccion_PosgradoEInvestigacion")]
+        [Authorize(Roles = "Subdirección De Posgrado E Investigación")]
+        public IActionResult GetActividadesSubPosgradoEInv(string estado)
         {
-
             var deptIdClaim = User.Claims.FirstOrDefault(x => x.Type == "id");
 
             if (deptIdClaim == null || !int.TryParse(deptIdClaim.Value, out int deptid))
@@ -76,34 +93,88 @@ namespace Proyecto_U3.Controllers
                 return Unauthorized();
             }
 
+            return Ok(GetActividades(deptid, estado));
 
-            var actividades = Repo.GetAllActWithInclude()
-                               .Where(x => x.IdDepartamento == deptid)
-                               .OrderBy(x => x.FechaRealizacion)
-                               .Select(x => new ActividadDTO
-                               {
-                                   Id = x.Id,
-                                   Titulo = x.Titulo,
-                                   Descripcion = x.Descripcion,
-                                   NombreDepto = x.IdDepartamentoNavigation.Nombre,
-                                   FechaDeRealizacion = x.FechaRealizacion,
-                                   Estado = x.Estado
-                               });
+        }
 
-            return Ok(actividades);
+        [HttpGet("Subireccion_DeVinculacion")]
+        [Authorize(Roles = "Subdirección De Vinculación")]
+        public IActionResult GetActividadesSubVinculacion(string estado)
+        {
+            var deptIdClaim = User.Claims.FirstOrDefault(x => x.Type == "id");
+
+            if (deptIdClaim == null || !int.TryParse(deptIdClaim.Value, out int deptid))
+            {
+                return Unauthorized();
+            }
+
+            return Ok(GetActividades(deptid, estado));
+
+        }
+
+        [HttpGet("Subireccion_DePlaneacion")]
+        [Authorize(Roles = "Subdirección De Planeación")]
+        public IActionResult GetActividadesSubPlaneacion(string estado)
+        {
+            var deptIdClaim = User.Claims.FirstOrDefault(x => x.Type == "id");
+
+            if (deptIdClaim == null || !int.TryParse(deptIdClaim.Value, out int deptid))
+            {
+                return Unauthorized();
+            }
+
+            return Ok(GetActividades(deptid, estado));
+
+        }
+
+        [HttpGet("Subireccion_Administrativa")]
+        [Authorize(Roles = "Subdirección Administrativa")]
+        public IActionResult GetActividadesSubAdmin(string estado)
+        {
+            var deptIdClaim = User.Claims.FirstOrDefault(x => x.Type == "id");
+
+            if (deptIdClaim == null || !int.TryParse(deptIdClaim.Value, out int deptid))
+            {
+                return Unauthorized();
+            }
+
+            return Ok(GetActividades(deptid, estado));
+
+        }
+
+        */
+
+        /// <summary>
+        /// METODO GET PARA TODAS LOS DEPARTAMENTOS REGISTRADOS DE ACUERDO AL TOKEN.
+        /// </summary>
+
+        //[HttpGet("{division}/{estado}")]
+        [HttpGet("{estado}")]
+        [Authorize]
+        public IActionResult GetActividadesDivisiones(string estado)
+        {
+            var deptIdClaim = User.Claims.FirstOrDefault(x => x.Type == "id");
+
+            if (deptIdClaim == null || !int.TryParse(deptIdClaim.Value, out int deptid))
+            {
+                return Unauthorized();
+            }
+
+            return Ok(GetActividades(deptid, estado));
         }
 
         /// <summary>
-        /// FILTROS ACTIVIDADES DE ACUERDO A ESTADO
+        /// FILTROS ACTIVIDADES DE ACUERDO A ESTADO Y AL ID DEL DEPARTAMENTO.
         /// </summary>
-        //[HttpGet("actividades")]
-        private IActionResult GetActividades(int deptId, int estado)
+        private IActionResult GetActividades(int deptId, string estado)
         {
             IEnumerable<ActividadDTO> actividades;
 
+            estado = estado.ToLower();
+
             switch (estado)
             {
-                case 0: // Borrador
+                case "borrador": // Borrador
                     actividades = Repo.GetActEnBorrador()
                                .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
                                .OrderBy(x => x.FechaRealizacion).Select(x => new ActividadDTO
@@ -117,7 +188,7 @@ namespace Proyecto_U3.Controllers
                                    Estado = x.Estado
                                }).ToList(); 
                     break;
-                case 1: // Publicadas
+                case "publicadas": // Publicadas
                     actividades = Repo.GetActPublicadas()
                                .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
                                .OrderBy(x => x.FechaRealizacion).Select(x => new ActividadDTO
@@ -131,7 +202,7 @@ namespace Proyecto_U3.Controllers
                                    Estado = x.Estado
                                }).ToList(); ;
                     break;
-                case 2: // Eliminadas
+                case "eliminadas": // Eliminadas
                     actividades = actividades = Repo.GetActEliminadas()
                                .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
                                .OrderBy(x => x.FechaRealizacion).Select(x => new ActividadDTO
@@ -146,7 +217,7 @@ namespace Proyecto_U3.Controllers
                                }).ToList(); ;
                     break;
                 default:
-                    return BadRequest("Estado de actividad no válido");
+                    return BadRequest("Estado de actividad no válido, solo pueden ser: Borrador, Publicadas o Eliminadas");
             }
 
             return Ok(actividades);
@@ -175,7 +246,7 @@ namespace Proyecto_U3.Controllers
         //    return Ok(result);
         //}
 
-        [HttpPost]
+        [HttpPost("AgregarActividad")]
         [Authorize]
         public IActionResult PostAct(ActividadDTO dto)
         {
@@ -215,7 +286,7 @@ namespace Proyecto_U3.Controllers
         }
 
 
-        [HttpPut("{id}")]
+        [HttpPut("EditarActividad/{id}")]
         [Authorize] 
         public IActionResult PutAct(ActividadDTO dto)
         {
@@ -259,7 +330,7 @@ namespace Proyecto_U3.Controllers
             return BadRequest(resultados.Errors.Select(x => x.ErrorMessage));
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("EliminarActividad/{id}")]
         [Authorize]
         public IActionResult DeleteAct(int id)
         {
