@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Proyecto_U3.Models.Validators;
 using U3Api.Models.DTOs;
@@ -19,28 +20,169 @@ namespace Proyecto_U3.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllActividades()
+        [Authorize(Roles = "Director General")]
+        public IActionResult GetAllActividades(int estado)
         {
-            //Parametros de fecha.
+            var deptIdClaim = User.Claims.FirstOrDefault(x => x.Type == "id");
 
-            var actividades = Repo.GetAll().
-                OrderBy(x => x.FechaCreacion).
-                Select(x => new ActividadDTO
-                {
-                    Id = x.Id,
-                    Titulo = x.Titulo,
-                    Descripcion = x.Descripcion,
-                    IdDepartamento = x.IdDepartamento,
-                    FechaDeCreacion = x.FechaCreacion,
-                    FechaDeRealizacion = x.FechaRealizacion,
-                    Estado = x.Estado
-                });
+            if (deptIdClaim == null || !int.TryParse(deptIdClaim.Value, out int deptid))
+            {
+                return Unauthorized();
+            }
+
+            return Ok(GetActividades(deptid,estado));
+        }
+
+        [HttpGet("Direccion_academica")]
+        [Authorize(Roles = "Direccion Academica")]
+        public IActionResult GetActividadesDireccionAcademica(int estado)
+        {
+            var deptIdClaim = User.Claims.FirstOrDefault(x => x.Type == "id");
+
+            if (deptIdClaim == null || !int.TryParse(deptIdClaim.Value, out int deptid))
+            {
+                return Unauthorized();
+            }
+
+            return Ok(GetActividades(deptid,estado));
+        }
+
+
+        [HttpGet("Subireccion_academica")]
+        [Authorize(Roles = "Subireccion Academica")]
+        public IActionResult GetActividadesSubDireccionAcademica(int estado)
+        {
+            var deptIdClaim = User.Claims.FirstOrDefault(x => x.Type == "id");
+
+            if (deptIdClaim == null || !int.TryParse(deptIdClaim.Value, out int deptid))
+            {
+                return Unauthorized();
+            }
+
+            return Ok(GetActividades(deptid,estado));
+
+        }
+
+
+        [HttpGet("sistemas_computacionales")]
+        [Authorize(Roles = "DIVISIÓN DE INGENIERÍA EN SISTEMAS COMPUTACIONALES")]
+        public IActionResult GetActividadesSistemas()
+        {
+
+            var deptIdClaim = User.Claims.FirstOrDefault(x => x.Type == "id");
+
+            if (deptIdClaim == null || !int.TryParse(deptIdClaim.Value, out int deptid))
+            {
+                return Unauthorized();
+            }
+
+
+            var actividades = Repo.GetAllActWithInclude()
+                               .Where(x => x.IdDepartamento == deptid)
+                               .OrderBy(x => x.FechaRealizacion)
+                               .Select(x => new ActividadDTO
+                               {
+                                   Id = x.Id,
+                                   Titulo = x.Titulo,
+                                   Descripcion = x.Descripcion,
+                                   NombreDepto = x.IdDepartamentoNavigation.Nombre,
+                                   FechaDeRealizacion = x.FechaRealizacion,
+                                   Estado = x.Estado
+                               });
+
             return Ok(actividades);
         }
 
+        /// <summary>
+        /// FILTROS ACTIVIDADES DE ACUERDO A ESTADO
+        /// </summary>
+        //[HttpGet("actividades")]
+        private IActionResult GetActividades(int deptId, int estado)
+        {
+            IEnumerable<ActividadDTO> actividades;
+
+            switch (estado)
+            {
+                case 0: // Borrador
+                    actividades = Repo.GetActEnBorrador()
+                               .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
+                               .OrderBy(x => x.FechaRealizacion).Select(x => new ActividadDTO
+                               {
+                                   Id = x.Id,
+                                   Titulo = x.Titulo,
+                                   Descripcion = x.Descripcion ?? "",
+                                   IdDepartamento = x.IdDepartamento,
+                                   NombreDepto = x.IdDepartamentoNavigation.Nombre,
+                                   FechaDeRealizacion = x.FechaRealizacion,
+                                   Estado = x.Estado
+                               }).ToList(); 
+                    break;
+                case 1: // Publicadas
+                    actividades = Repo.GetActPublicadas()
+                               .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
+                               .OrderBy(x => x.FechaRealizacion).Select(x => new ActividadDTO
+                               {
+                                   Id = x.Id,
+                                   Titulo = x.Titulo,
+                                   Descripcion = x.Descripcion ?? "",
+                                   IdDepartamento = x.IdDepartamento,
+                                   NombreDepto = x.IdDepartamentoNavigation.Nombre,
+                                   FechaDeRealizacion = x.FechaRealizacion,
+                                   Estado = x.Estado
+                               }).ToList(); ;
+                    break;
+                case 2: // Eliminadas
+                    actividades = actividades = Repo.GetActEliminadas()
+                               .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
+                               .OrderBy(x => x.FechaRealizacion).Select(x => new ActividadDTO
+                               {
+                                   Id = x.Id,
+                                   Titulo = x.Titulo,
+                                   Descripcion = x.Descripcion ?? "",
+                                   IdDepartamento = x.IdDepartamento,
+                                   NombreDepto = x.IdDepartamentoNavigation.Nombre,
+                                   FechaDeRealizacion = x.FechaRealizacion,
+                                   Estado = x.Estado
+                               }).ToList(); ;
+                    break;
+                default:
+                    return BadRequest("Estado de actividad no válido");
+            }
+
+            return Ok(actividades);
+        }
+
+
+        //private IActionResult GetActividades(int deptId)
+        //{
+        //    var actividades = Repo.GetAllActWithInclude()
+        //                       .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
+        //                       .OrderBy(x => x.FechaRealizacion);
+
+
+        //    var result = actividades
+        //    .Select(x => new ActividadDTO
+        //    {
+        //        Id = x.Id,
+        //        Titulo = x.Titulo,
+        //        Descripcion = x.Descripcion,
+        //        IdDepartamento = x.IdDepartamento,
+        //        NombreDepto = x.IdDepartamentoNavigation.Nombre,
+        //        FechaDeRealizacion = x.FechaRealizacion,
+        //        Estado = x.Estado
+        //    }).ToList();
+
+        //    return Ok(result);
+        //}
+
         [HttpPost]
+        [Authorize]
         public IActionResult PostAct(ActividadDTO dto)
         {
+
+            var deptIdClaim = User.Claims.FirstOrDefault(x => x.Type == "id");
+
+
             ActividadValidator validator = new();
             var resultados = validator.Validate(dto);
 
@@ -52,22 +194,33 @@ namespace Proyecto_U3.Controllers
                     Titulo = dto.Titulo,
                     Descripcion = dto.Descripcion,
                     FechaRealizacion = dto.FechaDeRealizacion,
-                    IdDepartamento = dto.IdDepartamento,
-                    FechaCreacion = DateTime.UtcNow,
-                    FechaActualizacion = DateTime.UtcNow,
+                    IdDepartamento = (int)dto.IdDepartamento,
+                    FechaCreacion = DateTime.Now,
+                    FechaActualizacion = DateTime.Now,
                     Estado = dto.Estado
                 };
-                Repo.Insert(entidad);
-                return Ok();
-        }
+
+                int.TryParse(deptIdClaim.Value, out int deptid);
+
+                if (entidad.IdDepartamento == deptid)
+                {
+                    Repo.Insert(entidad);
+                    return Ok();
+                }
+
+                return BadRequest("Debes agregar la actividad deseada a tu departamento correspondiente.");
+            }
 
             return BadRequest(resultados.Errors.Select(x => x.ErrorMessage));
         }
 
 
         [HttpPut("{id}")]
+        [Authorize] 
         public IActionResult PutAct(ActividadDTO dto)
         {
+            var deptIdClaim = User.Claims.FirstOrDefault(x => x.Type == "id");
+
             ActividadValidator validator = new();
             var resultados = validator.Validate(dto);
 
@@ -75,7 +228,7 @@ namespace Proyecto_U3.Controllers
             {
                 var actividad = Repo.Get(dto.Id ?? 0);
 
-                if (actividad == null || actividad.Estado == 3)
+                if (actividad == null || actividad.Estado == 2)
                 {
                     return NotFound();
                 }
@@ -84,35 +237,107 @@ namespace Proyecto_U3.Controllers
                     actividad.Titulo = dto.Titulo;
                     actividad.Descripcion = dto.Descripcion;
                     actividad.FechaRealizacion = dto.FechaDeRealizacion;
-                    actividad.IdDepartamento = dto.IdDepartamento;
-                    actividad.FechaCreacion = dto.FechaDeCreacion;
-                    actividad.FechaActualizacion = DateTime.UtcNow;
-                    actividad.Estado = dto.Estado;  
+                    actividad.IdDepartamento = (int)dto.IdDepartamento;
+                    //actividad.FechaCreacion = (DateTime)dto.FechaDeCreacion;
+                    actividad.FechaActualizacion = DateTime.Now;
+                    actividad.Estado = dto.Estado;
 
-                    Repo.Update(actividad);
 
-                    return Ok();
+                    int.TryParse(deptIdClaim.Value, out int deptid);
+
+                    if (actividad.IdDepartamento == deptid)
+                    {
+                        Repo.Update(actividad);
+                        return Ok();
+                    }
+
+                    return BadRequest("El departamento no es el correspondiente");
                 }
+
             }
 
             return BadRequest(resultados.Errors.Select(x => x.ErrorMessage));
         }
 
-
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        [Authorize]
+        public IActionResult DeleteAct(int id)
         {
-            var actividad = Repo.Get(id);
+            var deptIdClaim = User.Claims.FirstOrDefault(x => x.Type == "id");
 
-            if(actividad == null || actividad.Estado == 3)
+            var entidadAct = Repo.Get(id);
+
+            if (entidadAct == null || entidadAct.Estado == 2)
             {
                 return NotFound();
             }
 
-            actividad.Estado = 3;
-            actividad.FechaActualizacion = DateTime.UtcNow;
-            Repo.Update(actividad);
-            return Ok();
+            int.TryParse(deptIdClaim.Value, out int deptid);
+
+            if(entidadAct.IdDepartamento == deptid)
+            {
+                entidadAct.Estado = 2;
+                entidadAct.FechaActualizacion = DateTime.Now;
+                Repo.Update(entidadAct);
+                return Ok();
+            }
+
+            return BadRequest("La actividad que desea eliminar no es correspondiente a su departamento.");
+            
         }
     }
 }
+
+
+
+        //[HttpPut("{id}")]
+        //public IActionResult PutAct(ActividadDTO dto)
+        //{
+        //    ActividadValidator validator = new();
+        //    var resultados = validator.Validate(dto);
+
+        //    if (resultados.IsValid)
+        //    {
+        //        var actividad = Repo.Get(dto.Id ?? 0);
+
+        //        if (actividad == null || actividad.Estado == 3)
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            actividad.Titulo = dto.Titulo;
+        //            actividad.Descripcion = dto.Descripcion;
+        //            actividad.FechaRealizacion = dto.FechaDeRealizacion;
+        //            actividad.IdDepartamento = dto.IdDepartamento;
+        //            actividad.FechaCreacion = dto.FechaDeCreacion;
+        //            actividad.FechaActualizacion = DateTime.UtcNow;
+        //            actividad.Estado = dto.Estado;  
+
+        //            Repo.Update(actividad);
+
+        //            return Ok();
+        //        }
+        //    }
+
+        //    return BadRequest(resultados.Errors.Select(x => x.ErrorMessage));
+        //}
+
+
+        //[HttpDelete("{id}")]
+        //public IActionResult Delete(int id)
+        //{
+        //    var actividad = Repo.Get(id);
+
+        //    if(actividad == null || actividad.Estado == 3)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    actividad.Estado = 3;
+        //    actividad.FechaActualizacion = DateTime.UtcNow;
+        //    Repo.Update(actividad);
+        //    return Ok();
+        //}
+    //}
+//}

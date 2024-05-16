@@ -4,6 +4,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Proyecto_U3.Converters;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using U3Api.Helpers;
 using U3Api.Models.Entities;
 using U3Api.Repositories;
 
@@ -13,6 +16,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 var connectionstring = builder.Configuration.GetConnectionString("ApiU3ConnectionString");
 builder.Services.AddDbContext<ItesrcneActividadesContext>(x => x.UseMySql(connectionstring, ServerVersion.AutoDetect(connectionstring)));
+
+
+builder.Services.AddSingleton<JwtTokenGenerator>();
 
 builder.Services.AddTransient<Repository<Departamentos>>();
 builder.Services.AddTransient<Repository<Actividades>>();
@@ -27,9 +33,19 @@ builder.Services.AddControllers().AddJsonOptions(opt =>
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(x =>
 {
-    x.Audience = "pruebaU3";
-    x.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes("oWgVSB6azKciOUdwnRSMxKPyccYXiVp0qP0svFWemCQRK45kkbf3rqHbykHHYntKYyMxjKFJia9n7ZbKiC380uFSBuSuhzRd8IhY"));
-    x.TokenValidationParameters.ValidIssuer = "itesrcU3";
+    var issuer = builder.Configuration.GetSection("Jwt").GetValue<string>("Issuer");
+    var audience = builder.Configuration.GetSection("Jwt").GetValue<string>("Audience");
+    var secret = builder.Configuration.GetSection("Jwt").GetValue<string>("Secret");
+
+    x.TokenValidationParameters = new()
+    {
+        ValidIssuer = issuer,
+        ValidAudience = audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret ?? "")),
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateIssuerSigningKey = true
+    };
 
 });
 

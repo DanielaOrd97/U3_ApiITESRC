@@ -1,4 +1,5 @@
-﻿using U3Api.Models.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using U3Api.Models.Entities;
 
 namespace U3Api.Repositories
 {
@@ -11,9 +12,39 @@ namespace U3Api.Repositories
             Context = context;
         }
 
+        public IEnumerable<Actividades> GetAllActWithInclude()
+        {
+            return Context.Actividades
+                .Include(x => x.IdDepartamentoNavigation).ThenInclude(x => x.IdSuperiorNavigation)
+                .OrderBy(x => x.Id);
+        }
         public virtual IEnumerable<T> GetAll()
         {
             return Context.Set<T>();
+        }
+
+        public IEnumerable<Actividades> GetActEnBorrador()
+        {
+            return Context.Actividades.Include(x => x.IdDepartamentoNavigation)
+                .ThenInclude(x => x.IdSuperiorNavigation)
+                .OrderBy(x => x.Id)
+                .Where(x => x.Estado == 0);
+        }
+
+        public IEnumerable<Actividades> GetActPublicadas()
+        {
+            return Context.Actividades.Include(x => x.IdDepartamentoNavigation)
+                .ThenInclude(x => x.IdSuperiorNavigation)
+                .OrderBy(x => x.Id)
+                .Where(x => x.Estado == 1);
+        }
+
+        public IEnumerable<Actividades> GetActEliminadas()
+        {
+            return Context.Actividades.Include(x => x.IdDepartamentoNavigation)
+                .ThenInclude(x => x.IdSuperiorNavigation)
+                .OrderBy(x => x.Id)
+                .Where(x => x.Estado == 2);
         }
 
         public virtual T? Get(object id)

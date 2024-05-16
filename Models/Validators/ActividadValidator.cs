@@ -10,7 +10,7 @@ namespace Proyecto_U3.Models.Validators
             RuleFor(x => x.Titulo).NotEmpty().WithMessage("Ingrese el titulo de la actividad.");
             RuleFor(x => x.Descripcion).NotEmpty().WithMessage("Ingrese la descripcion de la actividad.");
             RuleFor(x => x.FechaDeRealizacion).NotEmpty().WithMessage("Ingrese la fecha en la que se realizo la actividad.");
-            RuleFor(x => x.IdDepartamento).NotEmpty().WithMessage("Indique el departamento al que pertenece la actividad.");
+          //  RuleFor(x => x.IdDepartamento).NotEmpty().WithMessage("Indique el departamento al que pertenece la actividad.");
             //FOTOS
         }
     }
