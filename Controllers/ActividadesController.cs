@@ -150,7 +150,7 @@ namespace Proyecto_U3.Controllers
 
         //[HttpGet("{division}/{estado}")]
         [HttpGet("{estado}")]
-        [Authorize]
+        [Authorize] 
         public IActionResult GetActividadesDivisiones(string estado)
         {
             var deptIdClaim = User.Claims.FirstOrDefault(x => x.Type == "id");
@@ -160,67 +160,127 @@ namespace Proyecto_U3.Controllers
                 return Unauthorized();
             }
 
-            return Ok(GetActividades(deptid, estado));
+            return Ok(GetActividadesEstado(deptid, estado));
         }
 
         /// <summary>
         /// FILTROS ACTIVIDADES DE ACUERDO A ESTADO Y AL ID DEL DEPARTAMENTO.
         /// </summary>
-        private IActionResult GetActividades(int deptId, string estado)
+        private IEnumerable<ActividadDTO> GetActividadesEstado(int deptId, string estado)
         {
-            IEnumerable<ActividadDTO> actividades;
+            //List<ActividadDTO> actividades;
 
             estado = estado.ToLower();
 
-            switch (estado)
-            {
-                case "borrador": // Borrador
-                    actividades = Repo.GetActEnBorrador()
-                               .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
-                               .OrderBy(x => x.FechaRealizacion).Select(x => new ActividadDTO
-                               {
-                                   Id = x.Id,
-                                   Titulo = x.Titulo,
-                                   Descripcion = x.Descripcion ?? "",
-                                   IdDepartamento = x.IdDepartamento,
-                                   NombreDepto = x.IdDepartamentoNavigation.Nombre,
-                                   FechaDeRealizacion = x.FechaRealizacion,
-                                   Estado = x.Estado
-                               }).ToList(); 
-                    break;
-                case "publicadas": // Publicadas
-                    actividades = Repo.GetActPublicadas()
-                               .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
-                               .OrderBy(x => x.FechaRealizacion).Select(x => new ActividadDTO
-                               {
-                                   Id = x.Id,
-                                   Titulo = x.Titulo,
-                                   Descripcion = x.Descripcion ?? "",
-                                   IdDepartamento = x.IdDepartamento,
-                                   NombreDepto = x.IdDepartamentoNavigation.Nombre,
-                                   FechaDeRealizacion = x.FechaRealizacion,
-                                   Estado = x.Estado
-                               }).ToList(); ;
-                    break;
-                case "eliminadas": // Eliminadas
-                    actividades = actividades = Repo.GetActEliminadas()
-                               .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
-                               .OrderBy(x => x.FechaRealizacion).Select(x => new ActividadDTO
-                               {
-                                   Id = x.Id,
-                                   Titulo = x.Titulo,
-                                   Descripcion = x.Descripcion ?? "",
-                                   IdDepartamento = x.IdDepartamento,
-                                   NombreDepto = x.IdDepartamentoNavigation.Nombre,
-                                   FechaDeRealizacion = x.FechaRealizacion,
-                                   Estado = x.Estado
-                               }).ToList(); ;
-                    break;
-                default:
-                    return BadRequest("Estado de actividad no válido, solo pueden ser: Borrador, Publicadas o Eliminadas");
-            }
+            //switch (estado)
+            //{
+            //    case "borrador": // Borrador
+            //        actividades = Repo.GetActEnBorrador()
+            //                   .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
+            //                   .OrderBy(x => x.FechaRealizacion).Select(x => new ActividadDTO
+            //                   {
+            //                       Id = x.Id,
+            //                       Titulo = x.Titulo,
+            //                       Descripcion = x.Descripcion ?? "",
+            //                       IdDepartamento = x.IdDepartamento,
+            //                       //NombreDepto = x.IdDepartamentoNavigation.Nombre,
+            //                       FechaDeRealizacion = x.FechaRealizacion,
+            //                       FechaDeCreacion = x.FechaCreacion,
+            //                       Estado = x.Estado
+            //                   }).ToList();
+            //        break;
+            //    case "publicadas": // Publicadas
+            //        actividades = Repo.GetActPublicadas()
+            //                   .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
+            //                   .OrderBy(x => x.FechaRealizacion).Select(x => new ActividadDTO
+            //                   {
+            //                       Id = x.Id,
+            //                       Titulo = x.Titulo,
+            //                       Descripcion = x.Descripcion ?? "",
+            //                       IdDepartamento = x.IdDepartamento,
+            //                       ///NombreDepto = x.IdDepartamentoNavigation.Nombre,
+            //                       FechaDeRealizacion = x.FechaRealizacion,
+            //                       FechaDeCreacion = x.FechaCreacion,
+            //                       Estado = x.Estado
+            //                   }).ToList(); ;
+            //        break;
+            //    case "eliminadas": // Eliminadas
+            //        actividades = actividades = Repo.GetActEliminadas()
+            //                   .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
+            //                   .OrderBy(x => x.FechaRealizacion).Select(x => new ActividadDTO
+            //                   {
+            //                       Id = x.Id,
+            //                       Titulo = x.Titulo,
+            //                       Descripcion = x.Descripcion ?? "",
+            //                       IdDepartamento = x.IdDepartamento,
+            //                       //NombreDepto = x.IdDepartamentoNavigation.Nombre,
+            //                       FechaDeRealizacion = x.FechaRealizacion,
+            //                       FechaDeCreacion = x.FechaCreacion,
+            //                       Estado = x.Estado
+            //                   }).ToList(); ;
+            //        break;
+            //    default:
+            //        return BadRequest("Estado de actividad no válido, solo pueden ser: Borrador, Publicadas o Eliminadas");
+            //}
 
-            return Ok(actividades);
+            //return Ok(actividades);
+
+            if (estado == "borrador")
+            {
+                var actividades = Repo.GetActEnBorrador()
+                               .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
+                               .OrderBy(x => x.FechaRealizacion).Select(x => new ActividadDTO
+                               {
+                                   Id = x.Id,
+                                   Titulo = x.Titulo,
+                                   Descripcion = x.Descripcion ?? "",
+                                   IdDepartamento = x.IdDepartamento,
+                                   ///NombreDepto = x.IdDepartamentoNavigation.Nombre,
+                                   FechaDeRealizacion = x.FechaRealizacion,
+                                   FechaDeCreacion = x.FechaCreacion,
+                                   Estado = x.Estado
+                               }).ToList();
+
+                return actividades;
+            }
+            else if (estado == "publicadas")
+            {
+                var actividades = Repo.GetActPublicadas()
+                               .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
+                               .OrderBy(x => x.FechaRealizacion).Select(x => new ActividadDTO
+                               {
+                                   Id = x.Id,
+                                   Titulo = x.Titulo,
+                                   Descripcion = x.Descripcion ?? "",
+                                   IdDepartamento = x.IdDepartamento,
+                                   //NombreDepto = x.IdDepartamentoNavigation.Nombre,
+                                   FechaDeRealizacion = x.FechaRealizacion,
+                                   FechaDeCreacion = x.FechaCreacion,
+                                   Estado = x.Estado
+                               }).ToList();
+
+                return actividades;
+            }
+            else if (estado == "eliminadas")
+            {
+                var actividades = Repo.GetActEliminadas()
+                               .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
+                               .OrderBy(x => x.FechaRealizacion).Select(x => new ActividadDTO
+                               {
+                                   Id = x.Id,
+                                   Titulo = x.Titulo,
+                                   Descripcion = x.Descripcion ?? "",
+                                   IdDepartamento = x.IdDepartamento,
+                                   //NombreDepto = x.IdDepartamentoNavigation.Nombre,
+                                   FechaDeRealizacion = x.FechaRealizacion,
+                                   FechaDeCreacion = x.FechaCreacion,
+                                   Estado = x.Estado
+                               }).ToList();
+
+                return actividades;
+            }
+            //return BadRequest("Estado de actividad no válido, solo pueden ser: Borrador, Publicadas o Eliminadas");
+            return null;
         }
 
 
