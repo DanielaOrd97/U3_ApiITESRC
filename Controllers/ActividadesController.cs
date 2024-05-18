@@ -168,62 +168,8 @@ namespace Proyecto_U3.Controllers
         /// </summary>
         private IEnumerable<ActividadDTO> GetActividadesEstado(int deptId, string estado)
         {
-            //List<ActividadDTO> actividades;
 
             estado = estado.ToLower();
-
-            //switch (estado)
-            //{
-            //    case "borrador": // Borrador
-            //        actividades = Repo.GetActEnBorrador()
-            //                   .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
-            //                   .OrderBy(x => x.FechaRealizacion).Select(x => new ActividadDTO
-            //                   {
-            //                       Id = x.Id,
-            //                       Titulo = x.Titulo,
-            //                       Descripcion = x.Descripcion ?? "",
-            //                       IdDepartamento = x.IdDepartamento,
-            //                       //NombreDepto = x.IdDepartamentoNavigation.Nombre,
-            //                       FechaDeRealizacion = x.FechaRealizacion,
-            //                       FechaDeCreacion = x.FechaCreacion,
-            //                       Estado = x.Estado
-            //                   }).ToList();
-            //        break;
-            //    case "publicadas": // Publicadas
-            //        actividades = Repo.GetActPublicadas()
-            //                   .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
-            //                   .OrderBy(x => x.FechaRealizacion).Select(x => new ActividadDTO
-            //                   {
-            //                       Id = x.Id,
-            //                       Titulo = x.Titulo,
-            //                       Descripcion = x.Descripcion ?? "",
-            //                       IdDepartamento = x.IdDepartamento,
-            //                       ///NombreDepto = x.IdDepartamentoNavigation.Nombre,
-            //                       FechaDeRealizacion = x.FechaRealizacion,
-            //                       FechaDeCreacion = x.FechaCreacion,
-            //                       Estado = x.Estado
-            //                   }).ToList(); ;
-            //        break;
-            //    case "eliminadas": // Eliminadas
-            //        actividades = actividades = Repo.GetActEliminadas()
-            //                   .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
-            //                   .OrderBy(x => x.FechaRealizacion).Select(x => new ActividadDTO
-            //                   {
-            //                       Id = x.Id,
-            //                       Titulo = x.Titulo,
-            //                       Descripcion = x.Descripcion ?? "",
-            //                       IdDepartamento = x.IdDepartamento,
-            //                       //NombreDepto = x.IdDepartamentoNavigation.Nombre,
-            //                       FechaDeRealizacion = x.FechaRealizacion,
-            //                       FechaDeCreacion = x.FechaCreacion,
-            //                       Estado = x.Estado
-            //                   }).ToList(); ;
-            //        break;
-            //    default:
-            //        return BadRequest("Estado de actividad no válido, solo pueden ser: Borrador, Publicadas o Eliminadas");
-            //}
-
-            //return Ok(actividades);
 
             if (estado == "borrador")
             {
@@ -235,7 +181,7 @@ namespace Proyecto_U3.Controllers
                                    Titulo = x.Titulo,
                                    Descripcion = x.Descripcion ?? "",
                                    IdDepartamento = x.IdDepartamento,
-                                   ///NombreDepto = x.IdDepartamentoNavigation.Nombre,
+                                   NombreDepto = x.IdDepartamentoNavigation.Nombre,
                                    FechaDeRealizacion = x.FechaRealizacion,
                                    FechaDeCreacion = x.FechaCreacion,
                                    Estado = x.Estado
@@ -253,7 +199,7 @@ namespace Proyecto_U3.Controllers
                                    Titulo = x.Titulo,
                                    Descripcion = x.Descripcion ?? "",
                                    IdDepartamento = x.IdDepartamento,
-                                   //NombreDepto = x.IdDepartamentoNavigation.Nombre,
+                                   NombreDepto = x.IdDepartamentoNavigation.Nombre,
                                    FechaDeRealizacion = x.FechaRealizacion,
                                    FechaDeCreacion = x.FechaCreacion,
                                    Estado = x.Estado
@@ -271,7 +217,7 @@ namespace Proyecto_U3.Controllers
                                    Titulo = x.Titulo,
                                    Descripcion = x.Descripcion ?? "",
                                    IdDepartamento = x.IdDepartamento,
-                                   //NombreDepto = x.IdDepartamentoNavigation.Nombre,
+                                   NombreDepto = x.IdDepartamentoNavigation.Nombre,
                                    FechaDeRealizacion = x.FechaRealizacion,
                                    FechaDeCreacion = x.FechaCreacion,
                                    Estado = x.Estado
@@ -283,28 +229,6 @@ namespace Proyecto_U3.Controllers
             return null;
         }
 
-
-        //private IActionResult GetActividades(int deptId)
-        //{
-        //    var actividades = Repo.GetAllActWithInclude()
-        //                       .Where(x => x.IdDepartamento == deptId || x.IdDepartamentoNavigation.IdSuperior == deptId)
-        //                       .OrderBy(x => x.FechaRealizacion);
-
-
-        //    var result = actividades
-        //    .Select(x => new ActividadDTO
-        //    {
-        //        Id = x.Id,
-        //        Titulo = x.Titulo,
-        //        Descripcion = x.Descripcion,
-        //        IdDepartamento = x.IdDepartamento,
-        //        NombreDepto = x.IdDepartamentoNavigation.Nombre,
-        //        FechaDeRealizacion = x.FechaRealizacion,
-        //        Estado = x.Estado
-        //    }).ToList();
-
-        //    return Ok(result);
-        //}
 
         [HttpPost("AgregarActividad")]
         [Authorize]

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using U3Api.Models.DTOs;
 using U3Api.Models.Entities;
 
 namespace U3Api.Repositories
@@ -27,7 +28,7 @@ namespace U3Api.Repositories
         {
             return Context.Actividades.Include(x => x.IdDepartamentoNavigation)
                 .ThenInclude(x => x.IdSuperiorNavigation)
-                .OrderBy(x => x.Id)
+                .OrderBy(x => x.FechaActualizacion)
                 .Where(x => x.Estado == 0);
         }
 
@@ -35,7 +36,7 @@ namespace U3Api.Repositories
         {
             return Context.Actividades.Include(x => x.IdDepartamentoNavigation)
                 .ThenInclude(x => x.IdSuperiorNavigation)
-                .OrderBy(x => x.Id)
+                .OrderBy(x => x.FechaActualizacion)
                 .Where(x => x.Estado == 1);
         }
 
@@ -43,8 +44,18 @@ namespace U3Api.Repositories
         {
             return Context.Actividades.Include(x => x.IdDepartamentoNavigation)
                 .ThenInclude(x => x.IdSuperiorNavigation)
-                .OrderBy(x => x.Id)
+                .OrderBy(x => x.FechaActualizacion)
                 .Where(x => x.Estado == 2);
+        }
+
+        public IEnumerable<AsociadoDTO> GetActAsociadas(int id)
+        {
+            return Context.Departamentos.Where(x => x.IdSuperior == id || x.Id == id)
+                .Select(x => new AsociadoDTO
+                {
+                    Id = x.Id,
+                    NombreAsociado = x.Nombre
+                }).ToList();
         }
 
         public virtual T? Get(object id)

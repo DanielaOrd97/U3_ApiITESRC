@@ -77,7 +77,16 @@ namespace U3Api.Controllers
                 if (usuario != null)
                 {
                     var token = JwtGenerator.GetToken(usuario.Username, usuario.Nombre, new List<Claim> { new Claim("id", usuario.Id.ToString()) });
-                    return Ok(token);
+                    //return Ok(token);
+                    var asociados = Repo.GetActAsociadas(usuario.Id);
+
+                    ResponseDTO response = new ResponseDTO
+                    {
+                        Token = token,
+                        ListaAsociados = asociados
+                    };
+
+                    return Ok(response);
                 }
 
                 return Unauthorized("Acceso denegado");
