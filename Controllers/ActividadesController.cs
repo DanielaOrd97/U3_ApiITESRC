@@ -289,19 +289,27 @@ namespace Proyecto_U3.Controllers
                 }
                 else
                 {
-                    actividad.Titulo = dto.Titulo;
-                    actividad.Descripcion = dto.Descripcion;
-                    actividad.FechaRealizacion = dto.FechaDeRealizacion;
-                    actividad.IdDepartamento = (int)dto.IdDepartamento;
-                    //actividad.FechaCreacion = (DateTime)dto.FechaDeCreacion;
-                    actividad.FechaActualizacion = DateTime.Now;
-                    actividad.Estado = dto.Estado;
+                    //actividad.Titulo = dto.Titulo;
+                    //actividad.Descripcion = dto.Descripcion;
+                    //actividad.FechaRealizacion = dto.FechaDeRealizacion;
+                    //actividad.IdDepartamento = (int)dto.IdDepartamento;
+                    ////actividad.FechaCreacion = (DateTime)dto.FechaDeCreacion;
+                    //actividad.FechaActualizacion = DateTime.Now;
+                    //actividad.Estado = dto.Estado;
 
 
                     int.TryParse(deptIdClaim.Value, out int deptid);
 
                     if (actividad.IdDepartamento == deptid)
                     {
+                        actividad.Titulo = dto.Titulo;
+                        actividad.Descripcion = dto.Descripcion;
+                        actividad.FechaRealizacion = dto.FechaDeRealizacion;
+                       // actividad.IdDepartamento = (int)dto.IdDepartamento;
+                        //actividad.FechaCreacion = (DateTime)dto.FechaDeCreacion;
+                        actividad.FechaActualizacion = DateTime.Now;
+                        actividad.Estado = dto.Estado;
+
                         Repo.Update(actividad);
                         return Ok();
                     }
