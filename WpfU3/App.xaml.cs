@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace WpfCliente
+namespace WpfU3
 {
     /// <summary>
     /// Interaction logic for App.xaml
