@@ -166,6 +166,22 @@ namespace Proyecto_U3.Controllers
         /// <summary>
         /// FILTROS ACTIVIDADES DE ACUERDO A ESTADO Y AL ID DEL DEPARTAMENTO.
         /// </summary>
+        /// 
+
+        private string GetImagenBase64(int id)
+        {
+            string directorio = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "imagenes", $"{id}.png");
+
+            if (System.IO.File.Exists(directorio))
+            {
+                byte[] bytes = System.IO.File.ReadAllBytes(directorio);
+                return Convert.ToBase64String(bytes);
+            }
+            else
+            {
+                return null;
+            }
+        }
         private IEnumerable<ActividadDTO> GetActividadesEstado(int deptId, string estado)
         {
 
@@ -184,7 +200,8 @@ namespace Proyecto_U3.Controllers
                                    NombreDepto = x.IdDepartamentoNavigation.Nombre,
                                    FechaDeRealizacion = x.FechaRealizacion,
                                    FechaDeCreacion = x.FechaCreacion,
-                                   Estado = x.Estado
+                                   Estado = x.Estado,
+                                   Imagen = GetImagenBase64(x.Id)
                                }).ToList();
 
                 return actividades;
@@ -202,7 +219,8 @@ namespace Proyecto_U3.Controllers
                                    NombreDepto = x.IdDepartamentoNavigation.Nombre,
                                    FechaDeRealizacion = x.FechaRealizacion,
                                    FechaDeCreacion = x.FechaCreacion,
-                                   Estado = x.Estado
+                                   Estado = x.Estado,
+                                   Imagen = GetImagenBase64(x.Id)
                                }).ToList();
 
                 return actividades;
@@ -220,7 +238,8 @@ namespace Proyecto_U3.Controllers
                                    NombreDepto = x.IdDepartamentoNavigation.Nombre,
                                    FechaDeRealizacion = x.FechaRealizacion,
                                    FechaDeCreacion = x.FechaCreacion,
-                                   Estado = x.Estado
+                                   Estado = x.Estado,
+                                   Imagen = GetImagenBase64(x.Id)
                                }).ToList();
 
                 return actividades;
@@ -260,6 +279,11 @@ namespace Proyecto_U3.Controllers
                 if (entidad.IdDepartamento == deptid)
                 {
                     Repo.Insert(entidad);
+
+                    string directorio = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "imagenes", $"{entidad.Id}.png");
+                    byte[] bytes = Convert.FromBase64String(dto.Imagen);
+                    System.IO.File.WriteAllBytes(directorio, bytes);
+
                     return Ok();
                 }
 

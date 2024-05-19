@@ -66,7 +66,6 @@ namespace U3Api.Controllers
         [HttpPost]
         public IActionResult LogIn(LogInDto dto)
         {
-
             LogInValidator validator = new();
             var resultados = validator.Validate(dto);
 
@@ -77,16 +76,42 @@ namespace U3Api.Controllers
                 if (usuario != null)
                 {
                     var token = JwtGenerator.GetToken(usuario.Username, usuario.Nombre, new List<Claim> { new Claim("id", usuario.Id.ToString()) });
-                    //return Ok(token);
-                    var asociados = Repo.GetActAsociadas(usuario.Id);
+                    var user = Repo.Get(usuario.Id);
+                    bool admin = false;
 
-                    ResponseDTO response = new ResponseDTO
+                    if (user != null && user.IdSuperior == null)
+                    {
+                        admin = true;
+                    }
+
+                    //var asociados = Repo.GetActAsociadas(usuario.Id);
+
+                    //ResponseDTO response = new ResponseDTO
+                    //{
+                    //    Token = token,
+                    //    ListaAsociados = asociados
+                    //};
+
+
+                    LogInResponseDTO response = new()
                     {
                         Token = token,
-                        ListaAsociados = asociados
+                        EsAdmin = admin
                     };
 
                     return Ok(response);
+
+
+                    //return Ok(token);
+                    //var asociados = Repo.GetActAsociadas(usuario.Id);
+
+                    //ResponseDTO response = new ResponseDTO
+                    //{
+                    //    Token = token,
+                    //    ListaAsociados = asociados
+                    //};
+
+                    //return Ok(response);
                 }
 
                 return Unauthorized("Acceso denegado");
